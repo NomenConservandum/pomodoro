@@ -25,7 +25,7 @@ void random_breaks() {
             cout << "\n\n\nTake a SHORT break (10 seconds).\n";
 	    system("play -q ./sounds/buzzer_short_break_start.wav");
             this_thread::sleep_for(chrono::seconds(10));
-	    system("play -q ./sounds/buzzer_shor_break_stop.wav");
+	    system("play -q ./sounds/buzzer_short_break_stop.wav");
 	    cout << "Short break is over.\nBack to the grind.\n";
 	}
     }
