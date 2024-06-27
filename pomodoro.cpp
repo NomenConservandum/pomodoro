@@ -5,47 +5,46 @@
 
 using namespace std;
 
-bool long_break = false;
-
-void working_time() {
-    cout << "It's time to grind.\n\n";
-    this_thread::sleep_for(chrono::minutes(25));
+void normal_break() {
     cout << "Take a break.\n\n";
-    system("play -q ./sounds/buzzer.wav");
-    long_break = true;
+	system("play -q ~/pomodoro/sounds/buzzer.wav");
+    this_thread::sleep_for(chrono::minutes(5));
 }
 
-void random_breaks() {
-    random_device rd;
-    uniform_int_distribution<int> dist(50, 180);
-    for (int i = 0; i < 15 && !long_break; ++i) {
-        int n = dist(rd);
-        this_thread::sleep_for(chrono::seconds(n));
-        if (!long_break) {
-            cout << "\n\n\nTake a SHORT break (10 seconds).\n";
-	    system("play -q ./sounds/buzzer_short_break_start.wav");
-            this_thread::sleep_for(chrono::seconds(10));
-	    system("play -q ./sounds/buzzer_short_break_stop.wav");
-	    cout << "Short break is over.\nBack to the grind.\n";
-	}
-    }
+void short_break() {
+    cout << "\n\n\nTake a SHORT break (10 seconds).\n";
+	system("play -q ~/pomodoro/sounds/buzzer_short_break_start.wav");
+    this_thread::sleep_for(chrono::seconds(10));
+	cout << "Short break is over.\nBack to the grind.\n";
+	system("play -q ~/pomodoro/sounds/buzzer_short_break_stop.wav");
 }
 
 int main() {
-    cout << "Welcome to Pomodoro (25/5) + random short (10 seconds) breaks timer.\n";
-    int cnt = 4;
-    cout << "Enter the amount of 25 minute sessions (optimal number is 4): ";  cin >> cnt;
-    cout << endl;
-    system("play -q ./sounds/buzzer.wav");
-    for (int i = 0; i < cnt; ++i) {
-        thread thr1(working_time);
-        random_breaks();
-        if (i != cnt - 1) {
-            this_thread::sleep_for(chrono::minutes(5));
-            long_break = false;
-	    system("play -q ./sounds/buzzer.wav");
+    int cnt;
+    random_device rd;
+    uniform_int_distribution<int> dist(100, 240);
+    
+    cout << "Welcome to Pomodoro (25/5) + random short (10 seconds) breaks timer.\nThis version has a different structure from the previous release.\n";
+    cout << "Enter the amount of 25 minute sessions (optimal number is 4): ";
+    cin >> cnt;
+    
+    for (int i = 1; i <= cnt; ++i) {
+        cout << "It's time to grind.\n\n";
+        system("play -q ~/pomodoro/sounds/buzzer.wav");
+        
+        int time = 25*60; // a single session's length (in seconds)
+        
+        for (int i = 0; i < 10 && time > 300; ++i) { // random breaks
+            int rest = dist(rd); // time to elapse before a short break (in seconds)
+            time -= rest + 10;
+            this_thread::sleep_for(chrono::seconds(rest));
+            short_break();
         }
+        
+        this_thread::sleep_for(chrono::seconds(time));
+        
+        if (i != cnt) normal_break();
     }
-    cout << "Congratulations on the work done!";
+    cout << "\n\nCongratulations on the work done!";
     return 0;
 }
